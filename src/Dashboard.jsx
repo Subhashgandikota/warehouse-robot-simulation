@@ -48,41 +48,44 @@ const findPath = (start, target, obstacles) => {
   return [];
 };
 
+const pickupPoints = [
+  { x: 0, y: 5 },
+  { x: 1, y: 4 }
+];
+
+const deliveryPoints = [
+  { x: 5, y: 5 },
+  { x: 4, y: 3 }
+];
+
 export default function Dashboard() {
 
-  const pickupPoints = [
-    { x: 0, y: 5 },
-    { x: 1, y: 4 }
-  ];
+  const [simData, setSimData] = useState({
+    robots: [
+      {
+        id: 0,
+        x: 0,
+        y: 0,
+        taskIndex: 0,
+        stage: "pickup",
+        carrying: false,
+        path: [],
+      },
+      {
+        id: 1,
+        x: 5,
+        y: 0,
+        taskIndex: 1,
+        stage: "pickup",
+        carrying: false,
+        path: [],
+      }
+    ],
+    completedBoxes: []
+  });
 
-  const deliveryPoints = [
-    { x: 5, y: 5 },
-    { x: 4, y: 3 }
-  ];
-
-  const [robots, setRobots] = useState([
-    {
-      id: 0,
-      x: 0,
-      y: 0,
-      taskIndex: 0,
-      stage: "pickup",
-      carrying: false,
-      path: [],
-    },
-    {
-      id: 1,
-      x: 5,
-      y: 0,
-      taskIndex: 1,
-      stage: "pickup",
-      carrying: false,
-      path: [],
-    }
-  ]);
-
+  const { robots, completedBoxes } = simData;
   const [obstacles, setObstacles] = useState([]);
-  const [completedBoxes, setCompletedBoxes] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
 
   // generate obstacles (no overlap with robots or targets)
@@ -108,10 +111,11 @@ export default function Dashboard() {
     if (!isRunning) return;
 
     const interval = setInterval(() => {
-      setRobots(currentRobots => {
+      setSimData(current => {
         let boxesToAdd = [];
+        let reservedPositions = [];
 
-        let newRobots = currentRobots.map(robot => {
+        let newRobots = current.robots.map(robot => {
           let r = { ...robot };
           
           let pickup = pickupPoints[r.taskIndex % pickupPoints.length];
@@ -137,22 +141,29 @@ export default function Dashboard() {
           let path = findPath({ x: r.x, y: r.y }, currentTarget, obstacles);
           if (path.length > 1) {
             const nextStep = path[1];
-            // Simple Collision Avoidance
-            const otherRobot = currentRobots.find(or => or.id !== r.id && or.x === nextStep.x && or.y === nextStep.y);
-            if (!otherRobot) {
+            
+            // Check if another robot is already there, or has reserved that step in this tick
+            const isOccupied = current.robots.some(or => or.id !== r.id && or.x === nextStep.x && or.y === nextStep.y) ||
+                               reservedPositions.some(pos => pos.x === nextStep.x && pos.y === nextStep.y);
+
+            if (!isOccupied) {
               r.x = nextStep.x;
               r.y = nextStep.y;
+              reservedPositions.push({ x: r.x, y: r.y });
+            } else {
+              reservedPositions.push({ x: r.x, y: r.y });
             }
+          } else {
+            reservedPositions.push({ x: r.x, y: r.y });
           }
           r.path = path;
           return r;
         });
 
-        if (boxesToAdd.length > 0) {
-          setCompletedBoxes(prev => [...prev, ...boxesToAdd]);
-        }
-
-        return newRobots;
+        return {
+          robots: newRobots,
+          completedBoxes: [...current.completedBoxes, ...boxesToAdd]
+        };
       });
     }, 1500);
 
