@@ -1,19 +1,35 @@
 # AI-Based Warehouse Robot Simulation
 
-A browser-based warehouse robot simulation built using React.js and Tailwind CSS. The application simulates autonomous robot navigation using the BFS pathfinding algorithm and visualizes robot activity through a live dashboard interface.
+A browser-based warehouse robot simulation built with React and Tailwind CSS. Robots navigate a grid warehouse using the BFS pathfinding algorithm, re-routing around obstacles in real time, while a live dashboard tracks task completion and distance travelled.
 
 ## Features
 
-* Grid-based warehouse simulation
-* BFS pathfinding algorithm for robot navigation
-* Obstacle detection and dynamic route re-routing
-* Live dashboard displaying task completion and distance metrics
-* Responsive and interactive UI
+- Grid-based warehouse layout
+- Autonomous robot navigation using BFS pathfinding
+- Obstacle detection with dynamic re-routing
+- Live dashboard showing task completion and distance metrics
+- Responsive UI
 
 ## Tech Stack
 
-* React.js
-* JavaScript
-* Tailwind CSS
-* BFS Algorithm
-* Vercel
+- React 19
+- Vite
+- Tailwind CSS
+- JavaScript (BFS pathfinding algorithm)
+
+## Running Locally
+
+```bash
+npm install
+npm run dev
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+## Deployment
+
+Deployed on Vercel.
